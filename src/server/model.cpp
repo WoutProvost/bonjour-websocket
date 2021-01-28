@@ -50,7 +50,7 @@ void Model::onServiceAdded(const QMdnsEngine::Service &service)
 	auto resolver = new QMdnsEngine::Resolver(&server, service.hostname(), &cache, this);
 	connect(resolver, &QMdnsEngine::Resolver::resolved, [this,service](const QHostAddress &address) {
 		if(!addresses[service.name()].contains(address.toString())) {
-			// Add the address to the list of addresses of this services
+			// Add the address to the list of addresses of this service
 			addresses[service.name()].append(address.toString());
 		
 			// Notify clients
