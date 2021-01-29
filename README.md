@@ -1,5 +1,5 @@
 # bonjour-websocket
-A [Bonjour](https://developer.apple.com/bonjour/) multicast DNS example using [QMdnsEngine](https://github.com/nitroshare/qmdnsengine) and [Qt WebSockets](https://doc.qt.io/qt-5/qtwebsockets-index.html).
+A [Bonjour/Zeroconf](https://developer.apple.com/bonjour/) multicast DNS example using [QMdnsEngine](https://github.com/nitroshare/qmdnsengine) and [Qt WebSockets](https://doc.qt.io/qt-5/qtwebsockets-index.html).
 
 ### Dependencies
 ```bash
