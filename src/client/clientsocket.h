@@ -11,8 +11,8 @@ class ClientSocket : public QObject
 	private:
 		QWebSocket webSocket;
 		
-		QMap<QPair<QByteArray, QByteArray>, QMdnsEngine::Service> services;
-		QMap<QPair<QByteArray, QByteArray>, QList<QString>> addresses;
+		QMap<QByteArray, QMap<QByteArray, QMdnsEngine::Service>> services;
+		QMap<QByteArray, QMap<QByteArray, QList<QString>>> addresses;
 
 		void addOrUpdateService(const QJsonObject &jsonService);
 		void removeService(const QJsonObject &jsonService);
