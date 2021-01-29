@@ -2,6 +2,7 @@
 #define CLIENTSOCKET_H
 
 #include <QWebSocket>
+#include <QTimer>
 #include <qmdnsengine/service.h>
 
 class ClientSocket : public QObject
@@ -12,9 +13,11 @@ class ClientSocket : public QObject
 		QUrl url;
 		int maxRetries;
 		int retryInterval;
+		int refreshInterval;
 		bool connected;
 		int retries;
 		QWebSocket webSocket;
+		QTimer refreshTimer;
 		
 		QMap<QByteArray, QMdnsEngine::Service> services;
 		QMap<QByteArray, QList<QString>> addresses;
@@ -25,7 +28,8 @@ class ClientSocket : public QObject
 		void printService(const QMdnsEngine::Service &service);
 
 	public:
-		ClientSocket(QString url = "ws://localhost:1234", int maxRetries = -1, int retryInterval = 5000); // 'ws' is non-SSL version, 'wss' is SSL version
+		// 'ws' is the non-SSL version, 'wss' is the SSL version
+		ClientSocket(QString url = "ws://localhost:1234", int maxRetries = -1, int retryInterval = 5000, int refreshInterval = -1);
 		~ClientSocket();
 
 	private slots:

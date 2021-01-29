@@ -1,19 +1,20 @@
 #include "clientsocket.h"
 #include <QCoreApplication>
-#include <QTimer>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include "../common/messagetype.h"
 
-ClientSocket::ClientSocket(QString url, int maxRetries, int retryInterval) :
+ClientSocket::ClientSocket(QString url, int maxRetries, int retryInterval, int refreshInterval) :
 	QObject(),
 	url(url),
 	maxRetries(maxRetries),
 	retryInterval(retryInterval),
+	refreshInterval(refreshInterval),
 	connected(false),
 	retries(0),
-	webSocket(QString(), QWebSocketProtocol::VersionLatest, this)
+	webSocket(QString(), QWebSocketProtocol::VersionLatest, this),
+	refreshTimer(this)
 {
 	qDebug() << "Searching for server on" << url;
 
@@ -21,6 +22,7 @@ ClientSocket::ClientSocket(QString url, int maxRetries, int retryInterval) :
 	connect(&webSocket, &QWebSocket::connected, this, &ClientSocket::onConnected);
 	connect(&webSocket, &QWebSocket::disconnected, this, &ClientSocket::onDisconnected);
 	connect(&webSocket, &QWebSocket::stateChanged, this, &ClientSocket::onStateChanged);
+	connect(&refreshTimer, &QTimer::timeout, this, &ClientSocket::refreshServices);
 
 	// Open the websocket connection
 	webSocket.open(url);
@@ -40,6 +42,11 @@ void ClientSocket::onConnected()
 	connected = true;
 	retries = 0;
 
+	// Start the refresh timer
+	if(refreshInterval >= 0) {
+		refreshTimer.start(refreshInterval);
+	}
+
 	// Register event handlers
 	connect(&webSocket, &QWebSocket::textMessageReceived, this, &ClientSocket::onTextMessageReceived);
 }
@@ -50,28 +57,34 @@ void ClientSocket::onDisconnected()
 		? qDebug() << "Disconnected"
 		: qDebug();
 
-	if(maxRetries == -1 || retries < maxRetries) {
+	// Stop the refresh timer
+	if(connected) {
+		refreshTimer.stop();
+	}
+
+	// Retry connection after a few ms if the maximum amount of retries hasn't been reached
+	if(maxRetries < 0 || retries < maxRetries) {
 		connected
 			? qDebug() << "Reconnecting ..."
 			: qDebug() << "Timeout. Retrying ...";
 
-		// Retry connection after a few ms if the maximum amount of retries hasn't been reached
 		QTimer::singleShot(retryInterval, this, &ClientSocket::onReconnect);
 		retries++;
-	} else {
+	}
+	// Quit the application
+	else {
 		maxRetries != 0
 			? qDebug() << "Timeout. Maximum amount of retries reached. Quitting application"
 			: qDebug();
 
-		// Quit the application
 		QCoreApplication::quit();
 	}
 }
 
 void ClientSocket::onReconnect()
 {
+	// Store that a connection isn't established anymore
 	if(connected) {
-		// Store that a connection isn't established anymore
 		connected = false;
 	}
 
