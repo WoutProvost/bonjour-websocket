@@ -105,7 +105,7 @@ QJsonObject ServerSocket::createJsonService(const QMdnsEngine::Service &service)
 	jsonService["attributes"] = jsonAttributes;
 
 	QJsonArray jsonAddresses;
-	auto addresses = &(*model->getAddresses())[service.name()][service.type()];
+	auto addresses = &(*model->getAddresses())[service.type()][service.name()];
 	for(auto it = addresses->begin(); it != addresses->end(); it++) {
 		jsonAddresses.append(*it);
 	}

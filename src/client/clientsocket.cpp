@@ -102,14 +102,14 @@ void ClientSocket::addOrUpdateService(const QJsonObject &jsonService)
 	}
 
 	// Delete all addresses of this service first
-	addresses[service.name()][service.type()].clear();
+	addresses[service.type()][service.name()].clear();
 
 	QJsonArray jsonAddresses = jsonService["addresses"].toArray();
 	for(auto it = jsonAddresses.begin(); it != jsonAddresses.end(); it++) {
-		addresses[service.name()][service.type()].append(it->toString().toUtf8());
+		addresses[service.type()][service.name()].append(it->toString().toUtf8());
 	}
 
-	services[service.name()][service.type()] = service;
+	services[service.type()][service.name()] = service;
 
 	printService(service);
 }
@@ -119,17 +119,17 @@ void ClientSocket::removeService(const QJsonObject &jsonService)
 	auto name = jsonService["name"].toString().toUtf8();
 	auto type = jsonService["type"].toString().toUtf8();
 
-	services[name].contains(type)
+	services[type].contains(name)
 		? qDebug() << "\e[31mREMOVED\e[0m" << name + " (" + type + ")"
 		: qDebug();
 
-	services[name].remove(type);
-	if(services[name].empty()) {
-		services.remove(name);
+	services[type].remove(name);
+	if(services[type].empty()) {
+		services.remove(type);
 	}
-	addresses[name].remove(type);
-	if(addresses[name].empty()) {
-		addresses.remove(name);
+	addresses[type].remove(name);
+	if(addresses[type].empty()) {
+		addresses.remove(type);
 	}
 }
 
@@ -156,7 +156,7 @@ void ClientSocket::printService(const QMdnsEngine::Service &service)
 		qDebug() << "\e[34mINFO\e[0m" << "\t" << it.key() << "->" << it.value();
 	}
 
-	auto addrs = addresses[service.name()][service.type()];
+	auto addrs = addresses[service.type()][service.name()];
 	qDebug() << "\e[34mINFO\e[0m" << "Addresses:" << (addrs.empty() ? "none" : "");
 	for(auto it = addrs.begin(); it != addrs.end(); it++) {
 		qDebug() << "\e[34mINFO\e[0m" << "\t" << *it;
