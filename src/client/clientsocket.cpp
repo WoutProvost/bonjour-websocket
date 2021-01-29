@@ -22,6 +22,7 @@ ClientSocket::ClientSocket(QString url, int maxRetries, int retryInterval, int r
 	connect(&webSocket, &QWebSocket::connected, this, &ClientSocket::onConnected);
 	connect(&webSocket, &QWebSocket::disconnected, this, &ClientSocket::onDisconnected);
 	connect(&webSocket, &QWebSocket::stateChanged, this, &ClientSocket::onStateChanged);
+	connect(&webSocket, &QWebSocket::textMessageReceived, this, &ClientSocket::onTextMessageReceived);
 	connect(&refreshTimer, &QTimer::timeout, this, &ClientSocket::refreshServices);
 
 	// Open the websocket connection
@@ -46,9 +47,6 @@ void ClientSocket::onConnected()
 	if(refreshInterval >= 0) {
 		refreshTimer.start(refreshInterval);
 	}
-
-	// Register event handlers
-	connect(&webSocket, &QWebSocket::textMessageReceived, this, &ClientSocket::onTextMessageReceived);
 }
 
 void ClientSocket::onDisconnected()
