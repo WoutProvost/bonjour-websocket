@@ -57,6 +57,7 @@ void Model::onServiceAdded(const QMdnsEngine::Service &service)
 	// Resolve the service in order to connect to it, using a lambda expression
 	auto resolver = new QMdnsEngine::Resolver(&server, service.hostname(), &cache, this);
 	connect(resolver, &QMdnsEngine::Resolver::resolved, [this,fullName,service](const QHostAddress &address) {
+		// Prevent duplicate address entries for a service, if for some reason that address is resolved more than once
 		if(!addresses[fullName].contains(address.toString())) {
 			// Add the address to the list of addresses of this service
 			addresses[fullName].append(address.toString());
