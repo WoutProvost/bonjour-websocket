@@ -181,6 +181,11 @@ void ClientSocket::removeService(const QByteArray &fullName)
 
 void ClientSocket::refreshServices()
 {
+	// Restarts the refresh timer if the refresh was called manually
+	if(!sender()) {
+		refreshTimer.start();
+	}
+
 	QJsonObject jsonMessage;
 	jsonMessage["type"] = MessageType::REFRESH;
 	QJsonDocument jsonDocument(jsonMessage);
