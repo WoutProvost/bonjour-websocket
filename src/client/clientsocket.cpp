@@ -1,12 +1,18 @@
 #include "clientsocket.h"
 #include <QCoreApplication>
+#include <QTimer>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include "../common/messagetype.h"
 
-ClientSocket::ClientSocket(QString url) :
+ClientSocket::ClientSocket(QString url, int maxRetries, int retryInterval) :
 	QObject(),
+	url(url),
+	maxRetries(maxRetries),
+	retryInterval(retryInterval),
+	connected(false),
+	retries(0),
 	webSocket(QString(), QWebSocketProtocol::VersionLatest, this)
 {
 	qDebug() << "Searching for server on" << url;
@@ -30,21 +36,53 @@ void ClientSocket::onConnected()
 {
 	qDebug() << "Connected";
 
+	// Store that a connection was established and reset the amount of retries
+	connected = true;
+	retries = 0;
+
 	// Register event handlers
 	connect(&webSocket, &QWebSocket::textMessageReceived, this, &ClientSocket::onTextMessageReceived);
 }
 
 void ClientSocket::onDisconnected()
 {
-	qDebug() << "Disconnected";
+	connected
+		? qDebug() << "Disconnected"
+		: qDebug();
 
-	// Quit the application
-	QCoreApplication::quit();
+	if(maxRetries == -1 || retries < maxRetries) {
+		connected
+			? qDebug() << "Reconnecting ..."
+			: qDebug() << "Timeout. Retrying ...";
+
+		// Retry connection after a few ms if the maximum amount of retries hasn't been reached
+		QTimer::singleShot(retryInterval, this, &ClientSocket::onReconnect);
+		retries++;
+	} else {
+		maxRetries != 0
+			? qDebug() << "Timeout. Maximum amount of retries reached. Quitting application"
+			: qDebug();
+
+		// Quit the application
+		QCoreApplication::quit();
+	}
+}
+
+void ClientSocket::onReconnect()
+{
+	if(connected) {
+		// Store that a connection isn't established anymore
+		connected = false;
+	}
+
+	// Reset and reopen the websocket connection
+	webSocket.abort();
+	webSocket.open(url);
 }
 
 void ClientSocket::onStateChanged(QAbstractSocket::SocketState state)
 {
-	qDebug() << "State changed to" << QVariant::fromValue(state).toString();
+	// qDebug() << "State changed to" << QVariant::fromValue(state).toString();
 }
 
 void ClientSocket::onTextMessageReceived(const QString &message)
