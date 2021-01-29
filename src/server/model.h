@@ -19,20 +19,21 @@ class Model : public QObject
 		QMdnsEngine::Server server;
 		QMdnsEngine::Cache cache;
 		QMdnsEngine::Browser browser;
-		QMap<QPair<QByteArray, QByteArray>, QMdnsEngine::Resolver *> resolvers;
+		QMap<QByteArray, QMdnsEngine::Resolver *> resolvers;
 
 		ServerSocket *serverSocket;
 
-		QMap<QPair<QByteArray, QByteArray>, QMdnsEngine::Service> services;
-		QMap<QPair<QByteArray, QByteArray>, QList<QString>> addresses;
+		QMap<QByteArray, QMdnsEngine::Service> services;
+		QMap<QByteArray, QList<QString>> addresses;
 
 	public:
 		Model(const QByteArray type = "_http._tcp.local.");
 		~Model();
 
 		void setServerSocket(ServerSocket *serverSocket);
-		QMap<QPair<QByteArray, QByteArray>, QMdnsEngine::Service>* getServices();
-		QMap<QPair<QByteArray, QByteArray>, QList<QString>>* getAddresses();
+		QMap<QByteArray, QMdnsEngine::Service>* getServices();
+		QMap<QByteArray, QList<QString>>* getAddresses();
+		QByteArray getServiceFullName(const QMdnsEngine::Service &service);
 
 	private slots:
 		void onServiceAdded(const QMdnsEngine::Service &service);

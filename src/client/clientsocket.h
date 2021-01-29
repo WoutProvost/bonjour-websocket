@@ -16,11 +16,11 @@ class ClientSocket : public QObject
 		int retries;
 		QWebSocket webSocket;
 		
-		QMap<QPair<QByteArray, QByteArray>, QMdnsEngine::Service> services;
-		QMap<QPair<QByteArray, QByteArray>, QList<QString>> addresses;
+		QMap<QByteArray, QMdnsEngine::Service> services;
+		QMap<QByteArray, QList<QString>> addresses;
 
 		void addOrUpdateService(const QJsonObject &jsonService);
-		void removeService(const QJsonObject &jsonService);
+		void removeService(const QByteArray &fullName);
 		void refreshServices();
 		void printService(const QMdnsEngine::Service &service);
 

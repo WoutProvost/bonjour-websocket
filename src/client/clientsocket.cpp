@@ -111,7 +111,7 @@ void ClientSocket::onTextMessageReceived(const QString &message)
 			break;
 		}
 		case MessageType::REMOVE: {
-			removeService(jsonMessage["service"].toObject());
+			removeService(jsonMessage["fullname"].toString().toUtf8());
 			break;
 		}
 		default: {
@@ -124,11 +124,11 @@ void ClientSocket::onTextMessageReceived(const QString &message)
 void ClientSocket::addOrUpdateService(const QJsonObject &jsonService)
 {
 	// Differentiate between service types of the same service
-	auto pair = qMakePair(jsonService["name"].toString().toUtf8(), jsonService["type"].toString().toUtf8());
+	auto fullName = jsonService["fullname"].toString().toUtf8();
 
-	services.contains(pair)
-		? qDebug() << "\e[33mUPDATED\e[0m" << jsonService["name"].toString() + " (" + jsonService["type"].toString() + ")"
-		: qDebug() << "\e[32mADDED\e[0m" << jsonService["name"].toString() + " (" + jsonService["type"].toString() + ")";
+	services.contains(fullName)
+		? qDebug() << "\e[33mUPDATED\e[0m" << fullName
+		: qDebug() << "\e[32mADDED\e[0m" << fullName;
 
 	QMdnsEngine::Service service;
 
@@ -143,29 +143,29 @@ void ClientSocket::addOrUpdateService(const QJsonObject &jsonService)
 	}
 
 	// Delete all addresses of this service first
-	addresses[pair].clear();
+	addresses[fullName].clear();
 
 	QJsonArray jsonAddresses = jsonService["addresses"].toArray();
 	for(auto it = jsonAddresses.begin(); it != jsonAddresses.end(); it++) {
-		addresses[pair].append(it->toString().toUtf8());
+		addresses[fullName].append(it->toString().toUtf8());
 	}
 
-	services[pair] = service;
+	services[fullName] = service;
 
 	printService(service);
 }
 
-void ClientSocket::removeService(const QJsonObject &jsonService)
+void ClientSocket::removeService(const QByteArray &fullName)
 {
 	// Differentiate between service types of the same service
-	auto pair = qMakePair(jsonService["name"].toString().toUtf8(), jsonService["type"].toString().toUtf8());
+	// fullName
 
-	services.contains(pair)
-		? qDebug() << "\e[31mREMOVED\e[0m" << pair.first + " (" + pair.second + ")"
+	services.contains(fullName)
+		? qDebug() << "\e[31mREMOVED\e[0m" << fullName
 		: qDebug();
 
-	services.remove(pair);
-	addresses.remove(pair);
+	services.remove(fullName);
+	addresses.remove(fullName);
 }
 
 void ClientSocket::refreshServices()
@@ -179,14 +179,15 @@ void ClientSocket::refreshServices()
 void ClientSocket::printService(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	auto pair = qMakePair(service.name(), service.type());
+	auto fullName = service.name() + "." + service.type();
 
-	qDebug() << "-----" << service.name() + " (" + service.type() + ")" << "-----";
+	qDebug() << "-----" << fullName << "-----";
 
 	qDebug() << "\e[34mINFO\e[0m" << "Name:" << service.name();
 	qDebug() << "\e[34mINFO\e[0m" << "Hostname:" << service.hostname();
 	qDebug() << "\e[34mINFO\e[0m" << "Port:" << service.port();
 	qDebug() << "\e[34mINFO\e[0m" << "Type:" << service.type();
+	qDebug() << "\e[34mINFO\e[0m" << "Fullname:" << fullName;
 
 	auto attributes = service.attributes();
 	qDebug() << "\e[34mINFO\e[0m" << "Attributes:" << (attributes.empty() ? "none" : "");
@@ -194,7 +195,7 @@ void ClientSocket::printService(const QMdnsEngine::Service &service)
 		qDebug() << "\e[34mINFO\e[0m" << "\t" << it.key() << "->" << it.value();
 	}
 
-	auto addrs = addresses[pair];
+	auto addrs = addresses[fullName];
 	qDebug() << "\e[34mINFO\e[0m" << "Addresses:" << (addrs.empty() ? "none" : "");
 	for(auto it = addrs.begin(); it != addrs.end(); it++) {
 		qDebug() << "\e[34mINFO\e[0m" << "\t" << *it;

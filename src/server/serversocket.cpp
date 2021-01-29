@@ -92,13 +92,14 @@ void ServerSocket::onTextMessageReceived(const QString &message)
 QJsonObject ServerSocket::createJsonService(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	auto pair = qMakePair(service.name(), service.type());
+	auto fullName = model->getServiceFullName(service);
 
 	QJsonObject jsonService;
 	jsonService["name"] = QString(service.name());
 	jsonService["hostname"] = QString(service.hostname());
 	jsonService["port"] = service.port();
 	jsonService["type"] = QString(service.type());
+	jsonService["fullname"] = QString(fullName);
 
 	QJsonObject jsonAttributes;
 	auto attributes = service.attributes();
@@ -108,7 +109,7 @@ QJsonObject ServerSocket::createJsonService(const QMdnsEngine::Service &service)
 	jsonService["attributes"] = jsonAttributes;
 
 	QJsonArray jsonAddresses;
-	auto addresses = &(*model->getAddresses())[pair];
+	auto addresses = &(*model->getAddresses())[fullName];
 	for(auto it = addresses->begin(); it != addresses->end(); it++) {
 		jsonAddresses.append(*it);
 	}
@@ -148,15 +149,11 @@ void ServerSocket::notifyClientsAddOrUpdateService(const QMdnsEngine::Service &s
 	}
 }
 
-void ServerSocket::notifyClientsRemoveService(const QPair<QByteArray, QByteArray> &pair)
+void ServerSocket::notifyClientsRemoveService(const QString &fullName)
 {
-	QJsonObject jsonService;
-	jsonService["name"] = QString(pair.first);
-	jsonService["type"] = QString(pair.second);
-
 	QJsonObject jsonMessage;
 	jsonMessage["type"] = MessageType::REMOVE;
-	jsonMessage["service"] = jsonService;
+	jsonMessage["fullname"] = fullName;
 
 	QJsonDocument jsonDocument(jsonMessage);
 	QByteArray json = jsonDocument.toJson();
