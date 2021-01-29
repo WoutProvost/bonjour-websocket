@@ -11,11 +11,11 @@ class ClientSocket : public QObject
 	private:
 		QWebSocket webSocket;
 		
-		QMap<QByteArray, QMdnsEngine::Service> services;
-		QMap<QByteArray, QList<QString>> addresses;
+		QMap<QPair<QByteArray, QByteArray>, QMdnsEngine::Service> services;
+		QMap<QPair<QByteArray, QByteArray>, QList<QString>> addresses;
 
 		void addOrUpdateService(const QJsonObject &jsonService);
-		void removeService(const QByteArray &name);
+		void removeService(const QJsonObject &jsonService);
 		void refreshServices();
 		void printService(const QMdnsEngine::Service &service);
 

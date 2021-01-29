@@ -26,7 +26,7 @@ class ServerSocket : public QObject
 		~ServerSocket();
 		
 		void notifyClientsAddOrUpdateService(const QMdnsEngine::Service &service);
-		void notifyClientsRemoveService(const QString &name);
+		void notifyClientsRemoveService(const QPair<QByteArray, QByteArray> &pair);
 
 	private slots:
 		void onClosed();
