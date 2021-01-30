@@ -15,10 +15,10 @@ int main(int argc, char *argv[])
 	parser.setApplicationDescription("Bonjour/Zeroconf multicast DNS websocket client.");
 	parser.addHelpOption();
 	parser.addVersionOption();
-	parser.addOption({{"u", "url"}, "The URL to connect to (default = ws://localhost:1234).", "URL", "ws://localhost:1234"});
-	parser.addOption({{"m", "max-retries"}, "The maximum amount of reconnection attempts (default = unlimited = -1).", "MAX", "-1"});
-	parser.addOption({{"r", "retry-interval"}, "The time to wait in ms before attempting a reconnect (default = 5000).", "INTERVAL", "5000"});
-	parser.addOption({{"f", "refresh-interval"}, "The time to wait in ms before requesting a data refresh (default = unlimited = -1).", "INTERVAL", "-1"});
+	parser.addOption({{"u", "url"}, "The URL to connect to (default = ws://localhost:1234).", "url", "ws://localhost:1234"});
+	parser.addOption({{"m", "max-retries"}, "The maximum amount of reconnection attempts (default = unlimited = -1).", "max", "-1"});
+	parser.addOption({{"r", "retry-interval"}, "The time to wait in ms before attempting a reconnect (default = 5000).", "interval", "5000"});
+	parser.addOption({{"f", "refresh-interval"}, "The time to wait in ms before requesting a data refresh (default = unlimited = -1).", "interval", "-1"});
 	parser.addOption({"verbose", "Displays debug information."});
 	parser.process(app);
 
