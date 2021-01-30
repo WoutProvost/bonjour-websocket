@@ -16,14 +16,14 @@ class ServerSocket : public QObject
 	private:
 		QWebSocketServer webSocketServer;
 		QList<QWebSocket *> clients;
-		Model *model;
+		Model &model;
 		bool verbose;
 
 		QJsonObject createJsonService(const QMdnsEngine::Service &service);
 		void notifyClientAllServices(QWebSocket *client);
 
 	public:
-		ServerSocket(Model *model, const QString name, const QString address, quint16 port, bool verbose);
+		ServerSocket(Model &model, const QString &name, const QString &address, quint16 port, bool verbose);
 		~ServerSocket();
 		
 		void notifyClientsAddOrUpdateService(const QMdnsEngine::Service &service);

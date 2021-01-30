@@ -30,7 +30,7 @@ class ClientSocket : public QObject
 
 	public:
 		// URL: 'ws://' is the non-SSL version, 'wss://' is the SSL version
-		ClientSocket(const QString url, int maxRetries, int retryInterval, int refreshInterval, bool verbose);
+		ClientSocket(const QString &url, int maxRetries, int retryInterval, int refreshInterval, bool verbose);
 		~ClientSocket();
 
 	private slots:

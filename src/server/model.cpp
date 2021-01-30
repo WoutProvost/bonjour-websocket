@@ -1,7 +1,7 @@
 #include "model.h"
 #include <qmdnsengine/resolver.h>
 
-Model::Model(const QString type, bool noCache) :
+Model::Model(const QString &type, bool noCache) :
 	QObject(),
 	noCache(noCache),
 	server(this),
@@ -26,14 +26,14 @@ void Model::setServerSocket(ServerSocket *serverSocket)
 	this->serverSocket = serverSocket;
 }
 
-QMap<QByteArray, QMdnsEngine::Service>* Model::getServices()
+QMap<QByteArray, QMdnsEngine::Service>& Model::getServices()
 {
-	return &services;
+	return services;
 }
 
-QMap<QByteArray, QList<QString>>* Model::getAddresses()
+QMap<QByteArray, QList<QString>>& Model::getAddresses()
 {
-	return &addresses;
+	return addresses;
 }
 
 QByteArray Model::getServiceFullName(const QMdnsEngine::Service &service)
@@ -44,7 +44,7 @@ QByteArray Model::getServiceFullName(const QMdnsEngine::Service &service)
 void Model::onServiceAdded(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	auto fullName = getServiceFullName(service);
+	QByteArray fullName = getServiceFullName(service);
 
 	// Add the service to the list of services
 	services[fullName] = service;
@@ -56,7 +56,7 @@ void Model::onServiceAdded(const QMdnsEngine::Service &service)
 	}
 
 	// Resolve the service in order to connect to it, using a lambda expression
-	auto resolver = new QMdnsEngine::Resolver(&server, service.hostname(), noCache ? nullptr : &cache, this);
+	QMdnsEngine::Resolver *resolver = new QMdnsEngine::Resolver(&server, service.hostname(), noCache ? nullptr : &cache, this);
 	connect(resolver, &QMdnsEngine::Resolver::resolved, [this,fullName,service](const QHostAddress &address) {
 		// Prevent duplicate address entries for a service, if for some reason that address is resolved more than once
 		if(!addresses[fullName].contains(address.toString())) {
@@ -78,7 +78,7 @@ void Model::onServiceAdded(const QMdnsEngine::Service &service)
 void Model::onServiceUpdated(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	auto fullName = getServiceFullName(service);
+	QByteArray fullName = getServiceFullName(service);
 
 	// Replace the service in the list of services with new data
 	services[fullName] = service;
@@ -90,7 +90,7 @@ void Model::onServiceUpdated(const QMdnsEngine::Service &service)
 void Model::onServiceRemoved(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	auto fullName = getServiceFullName(service);
+	QByteArray fullName = getServiceFullName(service);
 
 	// Delete the service from the list of services
 	services.remove(fullName);

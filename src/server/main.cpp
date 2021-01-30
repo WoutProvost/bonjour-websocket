@@ -1,6 +1,5 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <qmdnsengine/mdns.h>
 #include "model.h"
 #include "serversocket.h"
 
@@ -35,7 +34,7 @@ int main(int argc, char *argv[])
 
 	// Create components
 	Model model(type, noCache);
-	ServerSocket serverSocket(&model, name, address, port, verbose);
+	ServerSocket serverSocket(model, name, address, port, verbose);
 	model.setServerSocket(&serverSocket);
 
 	return app.exec();

@@ -28,12 +28,12 @@ class Model : public QObject
 		QMap<QByteArray, QList<QString>> addresses;
 
 	public:
-		Model(const QString type, bool noCache);
+		Model(const QString &type, bool noCache);
 		~Model();
 
 		void setServerSocket(ServerSocket *serverSocket);
-		QMap<QByteArray, QMdnsEngine::Service>* getServices();
-		QMap<QByteArray, QList<QString>>* getAddresses();
+		QMap<QByteArray, QMdnsEngine::Service>& getServices();
+		QMap<QByteArray, QList<QString>>& getAddresses();
 		QByteArray getServiceFullName(const QMdnsEngine::Service &service);
 
 	private slots:
