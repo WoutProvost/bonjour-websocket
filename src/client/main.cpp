@@ -1,12 +1,36 @@
 #include <QCoreApplication>
+#include <QCommandLineParser>
 #include "clientsocket.h"
 
 int main(int argc, char *argv[])
 {
 	QCoreApplication app(argc, argv);
+	app.setApplicationName("Client");
+	app.setApplicationVersion("1.0.0");
+	app.setOrganizationDomain("example.com");
+	app.setOrganizationName("Example");
+
+	// Setup command line options
+	QCommandLineParser parser;
+	parser.setApplicationDescription("Bonjour/Zeroconf multicast DNS websocket client.");
+	parser.addHelpOption();
+	parser.addVersionOption();
+	parser.addOption({{"u", "url"}, "The URL to connect to (default = ws://localhost:1234).", "URL", "ws://localhost:1234"});
+	parser.addOption({{"m", "max-retries"}, "The maximum amount of reconnection attempts (default = unlimited = -1).", "MAX", "-1"});
+	parser.addOption({{"r", "retry-interval"}, "The time to wait in ms before attempting a reconnect (default = 5000).", "INTERVAL", "5000"});
+	parser.addOption({{"f", "refresh-interval"}, "The time to wait in ms before requesting a data refresh (default = unlimited = -1).", "INTERVAL", "-1"});
+	parser.addOption({"verbose", "Displays debug information."});
+	parser.process(app);
+
+	// Parse command line options
+	QString url = parser.value("u");
+	int maxRetries = parser.value("m").toInt();
+	int retryInterval = parser.value("r").toInt();
+	int refreshInterval = parser.value("f").toInt();
+	bool verbose = parser.isSet("verbose");
 
 	// Create components
-	ClientSocket clientSocket;
+	ClientSocket clientSocket(url, maxRetries, retryInterval, refreshInterval, verbose);
 
 	return app.exec();
 }

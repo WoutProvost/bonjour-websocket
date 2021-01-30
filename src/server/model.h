@@ -16,6 +16,7 @@ class Model : public QObject
 	Q_OBJECT
 
 	private:
+		bool noCache;
 		QMdnsEngine::Server server;
 		QMdnsEngine::Cache cache;
 		QMdnsEngine::Browser browser;
@@ -27,7 +28,7 @@ class Model : public QObject
 		QMap<QByteArray, QList<QString>> addresses;
 
 	public:
-		Model(const QByteArray type = "_http._tcp.local.");
+		Model(const QString type, bool noCache);
 		~Model();
 
 		void setServerSocket(ServerSocket *serverSocket);

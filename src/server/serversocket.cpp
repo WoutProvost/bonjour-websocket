@@ -5,18 +5,19 @@
 #include <QJsonArray>
 #include "../common/messagetype.h"
 
-ServerSocket::ServerSocket(Model *model, quint16 port) :
+ServerSocket::ServerSocket(Model *model, const QString name, const QString address, quint16 port, bool verbose) :
 	QObject(),
 	model(model),
-	webSocketServer(QStringLiteral("Bonjour Server"), QWebSocketServer::NonSecureMode, this)
+	verbose(verbose),
+	webSocketServer(name, QWebSocketServer::NonSecureMode, this)
 {
 	// Register event handlers
 	connect(&webSocketServer, &QWebSocketServer::closed, this, &ServerSocket::onClosed);
 	connect(&webSocketServer, &QWebSocketServer::newConnection, this, &ServerSocket::onClientConnected);
 
 	// Start listening for incoming connections
-	if(webSocketServer.listen(QHostAddress::Any, port)) {
-		qDebug() << "Listening on port" << port;
+	if(webSocketServer.listen(QHostAddress(address), port)) {
+		if(verbose) qDebug() << "Listening on address" << address << "and port" << port;
 	}
 }
 
@@ -32,7 +33,7 @@ ServerSocket::~ServerSocket()
 
 void ServerSocket::onClosed()
 {
-	qDebug() << "Closed connection";
+	if(verbose) qDebug() << "Closed connection";
 
 	// Quit the application
 	QCoreApplication::quit();
@@ -40,7 +41,7 @@ void ServerSocket::onClosed()
 
 void ServerSocket::onClientConnected()
 {
-	qDebug() << "Client connected";
+	if(verbose) qDebug() << "Client connected";
 
 	// Get the new websocket connection
 	auto client = webSocketServer.nextPendingConnection();
@@ -58,7 +59,7 @@ void ServerSocket::onClientConnected()
 
 void ServerSocket::onClientDisconnected()
 {
-	qDebug() << "Client disconnected";
+	if(verbose) qDebug() << "Client disconnected";
 
 	// Remove the connection from the list of connected clients and deallocate memory
 	QWebSocket *client = qobject_cast<QWebSocket *>(sender());
@@ -82,7 +83,7 @@ void ServerSocket::onTextMessageReceived(const QString &message)
 				break;
 			}
 			default: {
-				qDebug() << "Unsupported message type" << jsonMessage["type"].toInt();
+				if(verbose) qDebug() << "Unsupported message type" << jsonMessage["type"].toInt();
 				break;
 			}
 		}

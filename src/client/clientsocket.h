@@ -14,6 +14,7 @@ class ClientSocket : public QObject
 		int maxRetries;
 		int retryInterval;
 		int refreshInterval;
+		bool verbose;
 		bool connected;
 		int retries;
 		QWebSocket webSocket;
@@ -28,15 +29,14 @@ class ClientSocket : public QObject
 		void printService(const QMdnsEngine::Service &service);
 
 	public:
-		// 'ws' is the non-SSL version, 'wss' is the SSL version
-		ClientSocket(QString url = "ws://localhost:1234", int maxRetries = -1, int retryInterval = 5000, int refreshInterval = -1);
+		// URL: 'ws://' is the non-SSL version, 'wss://' is the SSL version
+		ClientSocket(const QString url, int maxRetries, int retryInterval, int refreshInterval, bool verbose);
 		~ClientSocket();
 
 	private slots:
 		void onConnected();
 		void onDisconnected();
 		void onReconnect();
-		void onStateChanged(QAbstractSocket::SocketState state);
 		void onTextMessageReceived(const QString &message);
 };
 

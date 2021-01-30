@@ -5,23 +5,23 @@
 #include <QJsonArray>
 #include "../common/messagetype.h"
 
-ClientSocket::ClientSocket(QString url, int maxRetries, int retryInterval, int refreshInterval) :
+ClientSocket::ClientSocket(const QString url, int maxRetries, int retryInterval, int refreshInterval, bool verbose) :
 	QObject(),
 	url(url),
 	maxRetries(maxRetries),
 	retryInterval(retryInterval),
 	refreshInterval(refreshInterval),
+	verbose(verbose),
 	connected(false),
 	retries(0),
 	webSocket(QString(), QWebSocketProtocol::VersionLatest, this),
 	refreshTimer(this)
 {
-	qDebug() << "Searching for server on" << url;
+	if(verbose) qDebug() << "Searching for server on" << url;
 
 	// Register event handlers
 	connect(&webSocket, &QWebSocket::connected, this, &ClientSocket::onConnected);
 	connect(&webSocket, &QWebSocket::disconnected, this, &ClientSocket::onDisconnected);
-	connect(&webSocket, &QWebSocket::stateChanged, this, &ClientSocket::onStateChanged);
 	connect(&webSocket, &QWebSocket::textMessageReceived, this, &ClientSocket::onTextMessageReceived);
 	connect(&refreshTimer, &QTimer::timeout, this, &ClientSocket::refreshServices);
 
@@ -37,7 +37,7 @@ ClientSocket::~ClientSocket()
 
 void ClientSocket::onConnected()
 {
-	qDebug() << "Connected";
+	if(verbose) qDebug() << "Connected";
 
 	// Store that a connection was established and reset the amount of retries
 	connected = true;
@@ -51,7 +51,7 @@ void ClientSocket::onConnected()
 
 void ClientSocket::onDisconnected()
 {
-	connected
+	if(verbose) connected
 		? qDebug() << "Disconnected"
 		: qDebug();
 
@@ -62,7 +62,7 @@ void ClientSocket::onDisconnected()
 
 	// Retry connection after a few ms if the maximum amount of retries hasn't been reached
 	if(maxRetries < 0 || retries < maxRetries) {
-		connected
+		if(verbose) connected
 			? qDebug() << "Reconnecting ..."
 			: qDebug() << "Timeout. Retrying ...";
 
@@ -71,7 +71,7 @@ void ClientSocket::onDisconnected()
 	}
 	// Quit the application
 	else {
-		maxRetries != 0
+		if(verbose) maxRetries != 0
 			? qDebug() << "Timeout. Maximum amount of retries reached. Quitting application"
 			: qDebug();
 
@@ -91,11 +91,6 @@ void ClientSocket::onReconnect()
 	webSocket.open(url);
 }
 
-void ClientSocket::onStateChanged(QAbstractSocket::SocketState state)
-{
-	// qDebug() << "State changed to" << QVariant::fromValue(state).toString();
-}
-
 void ClientSocket::onTextMessageReceived(const QString &message)
 {
 	QJsonDocument jsonDocument = QJsonDocument::fromJson(message.toUtf8());
@@ -103,7 +98,7 @@ void ClientSocket::onTextMessageReceived(const QString &message)
 
 	switch(jsonMessage["type"].toInt()) {
 		case MessageType::ALL: {
-			services.empty()
+			if(verbose) services.empty()
 				? qDebug()
 				: qDebug() << "\e[33mREFRESH\e[0m";
 				
@@ -126,7 +121,7 @@ void ClientSocket::onTextMessageReceived(const QString &message)
 			break;
 		}
 		default: {
-			qDebug() << "Unsupported message type" << jsonMessage["type"].toInt();
+			if(verbose) qDebug() << "Unsupported message type" << jsonMessage["type"].toInt();
 			break;
 		}
 	}
@@ -137,7 +132,7 @@ void ClientSocket::addOrUpdateService(const QJsonObject &jsonService)
 	// Differentiate between service types of the same service
 	auto fullName = jsonService["fullname"].toString().toUtf8();
 
-	services.contains(fullName)
+	if(verbose) services.contains(fullName)
 		? qDebug() << "\e[33mUPDATED\e[0m" << fullName
 		: qDebug() << "\e[32mADDED\e[0m" << fullName;
 
@@ -163,7 +158,7 @@ void ClientSocket::addOrUpdateService(const QJsonObject &jsonService)
 
 	services[fullName] = service;
 
-	printService(service);
+	if(verbose) printService(service);
 }
 
 void ClientSocket::removeService(const QByteArray &fullName)
@@ -171,7 +166,7 @@ void ClientSocket::removeService(const QByteArray &fullName)
 	// Differentiate between service types of the same service
 	// fullName
 
-	services.contains(fullName)
+	if(verbose) services.contains(fullName)
 		? qDebug() << "\e[31mREMOVED\e[0m" << fullName
 		: qDebug();
 
