@@ -1,11 +1,12 @@
-#include <QCoreApplication>
+#include <QApplication>
 #include <QCommandLineParser>
 #include "../common/servicerepository.h"
 #include "clientsocket.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
-	QCoreApplication app(argc, argv);
+	QApplication app(argc, argv);
 	app.setApplicationName("Client");
 	app.setApplicationVersion("1.0.0");
 	app.setOrganizationDomain("example.com");
@@ -33,6 +34,10 @@ int main(int argc, char *argv[])
 	// Create components
 	ServiceRepository serviceRepository;
 	ClientSocket clientSocket(serviceRepository, url, maxRetries, retryInterval, refreshInterval, verbose);
+
+	// Create and show GUI
+	MainWindow mainWindow(serviceRepository);
+	mainWindow.show();
 
 	return app.exec();
 }

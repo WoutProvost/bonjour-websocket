@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>750</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="centralLayout">
+    <item>
+     <widget class="QSplitter" name="centralSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="servicesContainer">
+       <layout class="QVBoxLayout" name="servicesLayout">
+        <item>
+         <widget class="QLabel" name="servicesLabel">
+          <property name="text">
+           <string>Services:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="services"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="extrasContainer">
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <layout class="QVBoxLayout" name="extrasLayout">
+        <item>
+         <widget class="QToolButton" name="refreshButton">
+          <property name="toolTip">
+           <string>Refresh</string>
+          </property>
+          <property name="icon">
+           <iconset theme="view-refresh"/>
+          </property>
+          <property name="shortcut">
+           <string>F5</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSplitter" name="extrasSplitter">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="childrenCollapsible">
+           <bool>false</bool>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <widget class="QWidget" name="informationContainer">
+           <layout class="QVBoxLayout" name="informationLayout">
+            <item>
+             <widget class="QLabel" name="informationLabel">
+              <property name="text">
+               <string>Information:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="information">
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="rowCount">
+               <number>5</number>
+              </property>
+              <property name="columnCount">
+               <number>2</number>
+              </property>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>true</bool>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <row/>
+              <column>
+               <property name="text">
+                <string>Key</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Value</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="attributesContainer">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>4</verstretch>
+            </sizepolicy>
+           </property>
+           <layout class="QVBoxLayout" name="attributesLayout">
+            <property name="topMargin">
+             <number>24</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="attributesLabel">
+              <property name="text">
+               <string>Attributes:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="attributes">
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="columnCount">
+               <number>2</number>
+              </property>
+              <attribute name="horizontalHeaderStretchLastSection">
+               <bool>true</bool>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>Key</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Value</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="addressesContainer">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <layout class="QVBoxLayout" name="addressesLayout">
+            <property name="topMargin">
+             <number>24</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="addressesLabel">
+              <property name="text">
+               <string>Addresses:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="addresses"/>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
