@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
+#include "../common/servicerepository.h"
 #include "model.h"
 #include "serversocket.h"
 
@@ -33,9 +34,9 @@ int main(int argc, char *argv[])
 	bool verbose = parser.isSet("verbose");
 
 	// Create components
-	Model model(type, noCache);
-	ServerSocket serverSocket(model, name, address, port, verbose);
-	model.setServerSocket(&serverSocket);
+	ServiceRepository serviceRepository;
+	Model model(serviceRepository, type, noCache);
+	ServerSocket serverSocket(serviceRepository, name, address, port, verbose);
 
 	return app.exec();
 }

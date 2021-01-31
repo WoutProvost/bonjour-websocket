@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
+#include "../common/servicerepository.h"
 #include "clientsocket.h"
 
 int main(int argc, char *argv[])
@@ -30,7 +31,8 @@ int main(int argc, char *argv[])
 	bool verbose = parser.isSet("verbose");
 
 	// Create components
-	ClientSocket clientSocket(url, maxRetries, retryInterval, refreshInterval, verbose);
+	ServiceRepository serviceRepository;
+	ClientSocket clientSocket(serviceRepository, url, maxRetries, retryInterval, refreshInterval, verbose);
 
 	return app.exec();
 }

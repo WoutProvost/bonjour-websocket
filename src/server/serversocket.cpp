@@ -5,12 +5,15 @@
 #include <QJsonArray>
 #include "../common/messagetype.h"
 
-ServerSocket::ServerSocket(Model &model, const QString &name, const QString &address, quint16 port, bool verbose) :
+ServerSocket::ServerSocket(ServiceRepository &serviceRepository, const QString &name, const QString &address, quint16 port, bool verbose) :
 	QObject(),
-	model(model),
+	serviceRepository(serviceRepository),
 	verbose(verbose),
 	webSocketServer(name, QWebSocketServer::NonSecureMode, this)
 {
+	// Observe the repository
+	serviceRepository.setObserver(this);
+
 	// Register event handlers
 	connect(&webSocketServer, &QWebSocketServer::closed, this, &ServerSocket::onClosed);
 	connect(&webSocketServer, &QWebSocketServer::newConnection, this, &ServerSocket::onClientConnected);
@@ -26,7 +29,7 @@ ServerSocket::~ServerSocket()
 	// Stop listening for incoming connections
 	webSocketServer.close();
 
-	// Delete all clients and deallocate memory
+	// Remove all clients and deallocate memory
 	qDeleteAll(clients.begin(), clients.end());
 	clients.clear();
 }
@@ -93,7 +96,7 @@ void ServerSocket::onTextMessageReceived(const QString &message)
 QJsonObject ServerSocket::createJsonService(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	QByteArray fullName = model.getServiceFullName(service);
+	QByteArray fullName = serviceRepository.getServiceFullName(service);
 
 	QJsonObject jsonService;
 	jsonService["name"] = QString(service.name());
@@ -110,7 +113,7 @@ QJsonObject ServerSocket::createJsonService(const QMdnsEngine::Service &service)
 	jsonService["attributes"] = jsonAttributes;
 
 	QJsonArray jsonAddresses;
-	for(const auto &address : model.getAddresses()[fullName]) {
+	for(const auto &address : serviceRepository.getAddresses()[fullName]) {
 		jsonAddresses.append(address);
 	}
 	jsonService["addresses"] = jsonAddresses;
@@ -121,7 +124,7 @@ QJsonObject ServerSocket::createJsonService(const QMdnsEngine::Service &service)
 void ServerSocket::notifyClientAllServices(QWebSocket *client)
 {
 	QJsonArray jsonServices;
-	QMap<QByteArray, QMdnsEngine::Service> &services = model.getServices();
+	QMap<QByteArray, QMdnsEngine::Service> &services = serviceRepository.getServices();
 	for(auto it = services.begin(); it != services.end(); it++) {
 		jsonServices.append(createJsonService(*it));
 	}
@@ -134,7 +137,7 @@ void ServerSocket::notifyClientAllServices(QWebSocket *client)
 	client->sendTextMessage(jsonDocument.toJson());
 }
 
-void ServerSocket::notifyClientsAddOrUpdateService(const QMdnsEngine::Service &service)
+void ServerSocket::onAddOrUpdateService(const QMdnsEngine::Service &service)
 {
 	QJsonObject jsonMessage;
 	jsonMessage["type"] = MessageType::ADD_OR_UPDATE;
@@ -148,7 +151,7 @@ void ServerSocket::notifyClientsAddOrUpdateService(const QMdnsEngine::Service &s
 	}
 }
 
-void ServerSocket::notifyClientsRemoveService(const QString &fullName)
+void ServerSocket::onRemoveService(const QString &fullName)
 {
 	QJsonObject jsonMessage;
 	jsonMessage["type"] = MessageType::REMOVE;

@@ -1,8 +1,9 @@
 #include "model.h"
 #include <qmdnsengine/resolver.h>
 
-Model::Model(const QString &type, bool noCache) :
+Model::Model(ServiceRepository &serviceRepository, const QString &type, bool noCache) :
 	QObject(),
+	serviceRepository(serviceRepository),
 	noCache(noCache),
 	server(this),
 	cache(this),
@@ -16,38 +17,15 @@ Model::Model(const QString &type, bool noCache) :
 
 Model::~Model()
 {
-	// Delete all resolvers and deallocate memory
+	// Remove all resolvers and deallocate memory
 	qDeleteAll(resolvers.begin(), resolvers.end());
 	resolvers.clear();
-}
-
-void Model::setServerSocket(ServerSocket *serverSocket)
-{
-	this->serverSocket = serverSocket;
-}
-
-QMap<QByteArray, QMdnsEngine::Service>& Model::getServices()
-{
-	return services;
-}
-
-QMap<QByteArray, QList<QString>>& Model::getAddresses()
-{
-	return addresses;
-}
-
-QByteArray Model::getServiceFullName(const QMdnsEngine::Service &service)
-{
-	return service.name() + "." + service.type();
 }
 
 void Model::onServiceAdded(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	QByteArray fullName = getServiceFullName(service);
-
-	// Add the service to the list of services
-	services[fullName] = service;
+	QByteArray fullName = serviceRepository.getServiceFullName(service);
 
 	// Remove any previous resolver from the list of resolvers and deallocate memory
 	if(resolvers.contains(fullName)) {
@@ -58,42 +36,44 @@ void Model::onServiceAdded(const QMdnsEngine::Service &service)
 	// Resolve the service in order to connect to it, using a lambda expression
 	QMdnsEngine::Resolver *resolver = new QMdnsEngine::Resolver(&server, service.hostname(), noCache ? nullptr : &cache, this);
 	connect(resolver, &QMdnsEngine::Resolver::resolved, [this,fullName,service](const QHostAddress &address) {
+		QMap<QByteArray, QList<QString>> &addresses = serviceRepository.getAddresses();
+
 		// Prevent duplicate address entries for a service, if for some reason that address is resolved more than once
 		if(!addresses[fullName].contains(address.toString())) {
 			// Add the address to the list of addresses of this service
 			addresses[fullName].append(address.toString());
 		
 			// Notify clients
-			serverSocket->notifyClientsAddOrUpdateService(service);
+			serviceRepository.notifyAddOrUpdateService(service);
 		}
 	});
 
 	// Add the resolver to the list of resolvers to prevent it going out of scope
 	resolvers[fullName] = resolver;
 
+	// Add the service to the list of services
+	serviceRepository.getServices()[fullName] = service;
+
 	// Notify clients
-	serverSocket->notifyClientsAddOrUpdateService(service);
+	serviceRepository.notifyAddOrUpdateService(service);
 }
 
 void Model::onServiceUpdated(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	QByteArray fullName = getServiceFullName(service);
+	QByteArray fullName = serviceRepository.getServiceFullName(service);
 
 	// Replace the service in the list of services with new data
-	services[fullName] = service;
+	serviceRepository.getServices()[fullName] = service;
 
 	// Notify clients
-	serverSocket->notifyClientsAddOrUpdateService(service);
+	serviceRepository.notifyAddOrUpdateService(service);
 }
 
 void Model::onServiceRemoved(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	QByteArray fullName = getServiceFullName(service);
-
-	// Delete the service from the list of services
-	services.remove(fullName);
+	QByteArray fullName = serviceRepository.getServiceFullName(service);
 
 	// Remove the resolver from the list of resolvers and deallocate memory
 	if(resolvers.contains(fullName)) {
@@ -101,9 +81,12 @@ void Model::onServiceRemoved(const QMdnsEngine::Service &service)
 		resolvers.remove(fullName);
 	}
 
+	// Remove the service from the list of services
+	serviceRepository.getServices().remove(fullName);
+
 	// Remove all the addresses of this service from the list of addresses
-	addresses.remove(fullName);
+	serviceRepository.getAddresses().remove(fullName);
 
 	// Notify clients
-	serverSocket->notifyClientsRemoveService(fullName);
+	serviceRepository.notifyRemoveService(fullName);
 }

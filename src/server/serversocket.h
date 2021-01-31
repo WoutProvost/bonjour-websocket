@@ -3,31 +3,28 @@
 
 #include <QWebSocketServer>
 #include <QWebSocket>
-#include <qmdnsengine/service.h>
-#include "model.h"
+#include "../common/servicerepository.h"
 
-// Forward class declaration to prevent compiler from complaining
-class Model;
-
-class ServerSocket : public QObject
+class ServerSocket : public QObject, public Observer
 {
 	Q_OBJECT
 
 	private:
+		ServiceRepository &serviceRepository;
+		bool verbose;
+
 		QWebSocketServer webSocketServer;
 		QList<QWebSocket *> clients;
-		Model &model;
-		bool verbose;
 
 		QJsonObject createJsonService(const QMdnsEngine::Service &service);
 		void notifyClientAllServices(QWebSocket *client);
 
 	public:
-		ServerSocket(Model &model, const QString &name, const QString &address, quint16 port, bool verbose);
+		ServerSocket(ServiceRepository &serviceRepository, const QString &name, const QString &address, quint16 port, bool verbose);
 		~ServerSocket();
-		
-		void notifyClientsAddOrUpdateService(const QMdnsEngine::Service &service);
-		void notifyClientsRemoveService(const QString &fullName);
+
+		void onAddOrUpdateService(const QMdnsEngine::Service &service) override;
+		void onRemoveService(const QString &fullName) override;
 
 	private slots:
 		void onClosed();

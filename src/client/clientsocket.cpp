@@ -5,8 +5,9 @@
 #include <QJsonArray>
 #include "../common/messagetype.h"
 
-ClientSocket::ClientSocket(const QString &url, int maxRetries, int retryInterval, int refreshInterval, bool verbose) :
+ClientSocket::ClientSocket(ServiceRepository &serviceRepository, const QString &url, int maxRetries, int retryInterval, int refreshInterval, bool verbose) :
 	QObject(),
+	serviceRepository(serviceRepository),
 	url(url),
 	maxRetries(maxRetries),
 	retryInterval(retryInterval),
@@ -98,13 +99,15 @@ void ClientSocket::onTextMessageReceived(const QString &message)
 
 	switch(jsonMessage["type"].toInt()) {
 		case MessageType::ALL: {
+			QMap<QByteArray, QMdnsEngine::Service> &services = serviceRepository.getServices();
+
 			if(verbose) services.empty()
 				? qDebug()
 				: qDebug() << "\e[33mREFRESH\e[0m";
 				
-			// Delete all services and addresses first
+			// Remove all services and addresses first
 			services.clear();
-			addresses.clear();
+			serviceRepository.getAddresses().clear();
 
 			for(const auto &jsonService : jsonMessage["services"].toArray()) {
 				addOrUpdateService(jsonService.toObject());
@@ -131,6 +134,9 @@ void ClientSocket::addOrUpdateService(const QJsonObject &jsonService)
 	// Differentiate between service types of the same service
 	QByteArray fullName = jsonService["fullname"].toString().toUtf8();
 
+	QMap<QByteArray, QMdnsEngine::Service> &services = serviceRepository.getServices();
+	QMap<QByteArray, QList<QString>> &addresses = serviceRepository.getAddresses();
+
 	if(verbose) services.contains(fullName)
 		? qDebug() << "\e[33mUPDATED\e[0m" << fullName
 		: qDebug() << "\e[32mADDED\e[0m" << fullName;
@@ -147,7 +153,7 @@ void ClientSocket::addOrUpdateService(const QJsonObject &jsonService)
 		service.addAttribute(it.key().toUtf8(), it.value().toString().toUtf8());
 	}
 
-	// Delete all addresses of this service first
+	// Remove all addresses of this service first
 	addresses[fullName].clear();
 
 	for(const auto &jsonAddress : jsonService["addresses"].toArray()) {
@@ -164,12 +170,14 @@ void ClientSocket::removeService(const QByteArray &fullName)
 	// Differentiate between service types of the same service
 	// fullName
 
+	QMap<QByteArray, QMdnsEngine::Service> &services = serviceRepository.getServices();
+
 	if(verbose) services.contains(fullName)
 		? qDebug() << "\e[31mREMOVED\e[0m" << fullName
 		: qDebug();
 
 	services.remove(fullName);
-	addresses.remove(fullName);
+	serviceRepository.getAddresses().remove(fullName);
 }
 
 void ClientSocket::refreshServices()
@@ -188,7 +196,7 @@ void ClientSocket::refreshServices()
 void ClientSocket::printService(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
-	QByteArray fullName = service.name() + "." + service.type();
+	QByteArray fullName = serviceRepository.getServiceFullName(service);
 
 	qDebug() << "-----" << fullName << "-----";
 
@@ -204,9 +212,9 @@ void ClientSocket::printService(const QMdnsEngine::Service &service)
 		qDebug() << "\e[34mINFO\e[0m" << "\t" << it.key() << "->" << it.value();
 	}
 
-	QList<QString> &addrs = addresses[fullName];
-	qDebug() << "\e[34mINFO\e[0m" << "Addresses:" << (addrs.empty() ? "none" : "");
-	for(const auto &address : addrs) {
+	QList<QString> &addresses = serviceRepository.getAddresses()[fullName];
+	qDebug() << "\e[34mINFO\e[0m" << "Addresses:" << (addresses.empty() ? "none" : "");
+	for(const auto &address : addresses) {
 		qDebug() << "\e[34mINFO\e[0m" << "\t" << address;
 	}
 }
