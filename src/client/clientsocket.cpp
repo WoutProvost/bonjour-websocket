@@ -57,7 +57,7 @@ void ClientSocket::onDisconnected()
 		: qDebug();
 
 	// Stop the refresh timer
-	if(connected) {
+	if(connected && refreshInterval >= 0) {
 		refreshTimer.stop();
 	}
 
@@ -183,8 +183,8 @@ void ClientSocket::removeService(const QByteArray &fullName)
 void ClientSocket::refreshServices()
 {
 	// Restarts the refresh timer if the refresh was called manually
-	if(!sender()) {
-		refreshTimer.start();
+	if(!sender() && refreshInterval >= 0) {
+		refreshTimer.start(refreshInterval);
 	}
 
 	QJsonObject jsonMessage;
