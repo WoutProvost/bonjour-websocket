@@ -1,5 +1,5 @@
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef SERVICEDISCOVERY_H
+#define SERVICEDISCOVERY_H
 
 #include <qmdnsengine/server.h>
 #include <qmdnsengine/cache.h>
@@ -7,7 +7,7 @@
 #include <qmdnsengine/resolver.h>
 #include "../common/servicerepository.h"
 
-class Model : public QObject
+class ServiceDiscovery : public QObject
 {
 	Q_OBJECT
 
@@ -21,8 +21,8 @@ class Model : public QObject
 		QMap<QByteArray, QMdnsEngine::Resolver *> resolvers;
 
 	public:
-		Model(ServiceRepository &serviceRepository, const QString &type, bool noCache);
-		~Model();
+		ServiceDiscovery(ServiceRepository &serviceRepository, const QString &type, bool noCache);
+		~ServiceDiscovery();
 
 	private slots:
 		void onServiceAdded(const QMdnsEngine::Service &service);

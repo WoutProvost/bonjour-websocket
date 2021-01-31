@@ -1,7 +1,7 @@
-#include "model.h"
+#include "servicediscovery.h"
 #include <qmdnsengine/resolver.h>
 
-Model::Model(ServiceRepository &serviceRepository, const QString &type, bool noCache) :
+ServiceDiscovery::ServiceDiscovery(ServiceRepository &serviceRepository, const QString &type, bool noCache) :
 	QObject(),
 	serviceRepository(serviceRepository),
 	noCache(noCache),
@@ -10,19 +10,19 @@ Model::Model(ServiceRepository &serviceRepository, const QString &type, bool noC
 	browser(&server, type.toUtf8(), noCache ? nullptr : &cache, this)
 {
 	// Register event handlers
-	connect(&browser, &QMdnsEngine::Browser::serviceAdded, this, &Model::onServiceAdded);
-	connect(&browser, &QMdnsEngine::Browser::serviceUpdated, this, &Model::onServiceUpdated);
-	connect(&browser, &QMdnsEngine::Browser::serviceRemoved, this, &Model::onServiceRemoved);
+	connect(&browser, &QMdnsEngine::Browser::serviceAdded, this, &ServiceDiscovery::onServiceAdded);
+	connect(&browser, &QMdnsEngine::Browser::serviceUpdated, this, &ServiceDiscovery::onServiceUpdated);
+	connect(&browser, &QMdnsEngine::Browser::serviceRemoved, this, &ServiceDiscovery::onServiceRemoved);
 }
 
-Model::~Model()
+ServiceDiscovery::~ServiceDiscovery()
 {
 	// Remove all resolvers and deallocate memory
 	qDeleteAll(resolvers.begin(), resolvers.end());
 	resolvers.clear();
 }
 
-void Model::onServiceAdded(const QMdnsEngine::Service &service)
+void ServiceDiscovery::onServiceAdded(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
 	QByteArray fullName = serviceRepository.getServiceFullName(service);
@@ -58,7 +58,7 @@ void Model::onServiceAdded(const QMdnsEngine::Service &service)
 	serviceRepository.notifyAddOrUpdateService(service);
 }
 
-void Model::onServiceUpdated(const QMdnsEngine::Service &service)
+void ServiceDiscovery::onServiceUpdated(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
 	QByteArray fullName = serviceRepository.getServiceFullName(service);
@@ -70,7 +70,7 @@ void Model::onServiceUpdated(const QMdnsEngine::Service &service)
 	serviceRepository.notifyAddOrUpdateService(service);
 }
 
-void Model::onServiceRemoved(const QMdnsEngine::Service &service)
+void ServiceDiscovery::onServiceRemoved(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
 	QByteArray fullName = serviceRepository.getServiceFullName(service);

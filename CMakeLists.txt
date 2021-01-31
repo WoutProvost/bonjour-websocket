@@ -24,7 +24,7 @@ list(APPEND LIBRARIES qmdnsengine)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
-add_executable(server src/server/main.cpp src/common/servicerepository.cpp src/server/model.cpp src/server/serversocket.cpp)
+add_executable(server src/server/main.cpp src/common/servicerepository.cpp src/server/servicediscovery.cpp src/server/serversocket.cpp)
 add_executable(client src/client/main.cpp src/common/servicerepository.cpp src/client/clientsocket.cpp)
 
 # Use c++17

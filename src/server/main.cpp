@@ -1,7 +1,7 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include "../common/servicerepository.h"
-#include "model.h"
+#include "servicediscovery.h"
 #include "serversocket.h"
 
 int main(int argc, char *argv[])
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
 	// Create components
 	ServiceRepository serviceRepository;
-	Model model(serviceRepository, type, noCache);
+	ServiceDiscovery servicediscovery(serviceRepository, type, noCache);
 	ServerSocket serverSocket(serviceRepository, name, address, port, verbose);
 
 	return app.exec();
