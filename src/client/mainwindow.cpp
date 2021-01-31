@@ -31,16 +31,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::onSelectionChanged(const QString &fullName)
 {
-	qDebug() << "Selection changed to" << fullName;
-
 	// Display extras of the current selected service
 	showExtras(fullName);
 }
 
 void MainWindow::onRefreshTriggered()
 {
-	qDebug() << "Refresh";
-
 	// Remove all extras and services first
 	ui->information->clearContents();
 	ui->attributes->clearContents();
@@ -96,8 +92,6 @@ void MainWindow::onAddOrUpdateService(const QMdnsEngine::Service &service)
 
 	// Add the service to the list of services
 	if(ui->services->findItems(fullName, Qt::MatchExactly).empty()) {
-		qDebug() << "Added service" << serviceRepository.getServiceFullName(service);
-
 		ui->services->addItem(fullName);
 
 		// Select the first item when the list was empty
@@ -107,16 +101,12 @@ void MainWindow::onAddOrUpdateService(const QMdnsEngine::Service &service)
 	}
 	// Update the service extras when the updated service is the current selected service
 	else if(ui->services->currentItem()->text() == fullName) {
-		qDebug() << "Updated service" << serviceRepository.getServiceFullName(service);
-
 		showExtras(fullName);
 	}
 }
 
 void MainWindow::onRemoveService(const QString &fullName)
 {
-	qDebug() << "Removed service" << fullName;
-
 	// Remove the service from the list of services
 	delete ui->services->findItems(fullName, Qt::MatchExactly).first();
 }
