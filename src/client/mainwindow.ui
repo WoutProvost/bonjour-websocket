@@ -46,6 +46,9 @@
         <enum>Qt::RightToLeft</enum>
        </property>
        <layout class="QVBoxLayout" name="extrasLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QToolButton" name="refreshButton">
           <property name="toolTip">
