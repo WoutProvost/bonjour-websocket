@@ -162,6 +162,9 @@ void ClientSocket::addOrUpdateService(const QJsonObject &jsonService)
 
 	services[fullName] = service;
 
+	// Notify GUI
+	serviceRepository.notifyAddOrUpdateService(service);
+
 	if(verbose) printService(service);
 }
 
@@ -178,6 +181,9 @@ void ClientSocket::removeService(const QByteArray &fullName)
 
 	services.remove(fullName);
 	serviceRepository.getAddresses().remove(fullName);
+
+	// Notify GUI
+	serviceRepository.notifyRemoveService(fullName);
 }
 
 void ClientSocket::refreshServices()
