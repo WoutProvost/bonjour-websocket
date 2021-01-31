@@ -33,7 +33,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="services"/>
+         <widget class="QListWidget" name="services">
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -176,7 +180,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QListWidget" name="addresses"/>
+             <widget class="QListWidget" name="addresses">
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>

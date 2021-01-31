@@ -24,13 +24,14 @@ class ClientSocket : public QObject
 
 		void addOrUpdateService(const QJsonObject &jsonService);
 		void removeService(const QByteArray &fullName);
-		void refreshServices();
 		void printService(const QMdnsEngine::Service &service);
 
 	public:
 		// URL: 'ws://' is the non-SSL version, 'wss://' is the SSL version
 		ClientSocket(ServiceRepository &serviceRepository, const QString &url, int maxRetries, int retryInterval, int refreshInterval, bool verbose);
 		~ClientSocket();
+		
+		void refreshServices();
 
 	private slots:
 		void onConnected();

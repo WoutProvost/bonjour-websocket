@@ -186,19 +186,6 @@ void ClientSocket::removeService(const QByteArray &fullName)
 	serviceRepository.notifyRemoveService(fullName);
 }
 
-void ClientSocket::refreshServices()
-{
-	// Restarts the refresh timer if the refresh was called manually
-	if(!sender() && refreshInterval >= 0) {
-		refreshTimer.start(refreshInterval);
-	}
-
-	QJsonObject jsonMessage;
-	jsonMessage["type"] = MessageType::REFRESH;
-	QJsonDocument jsonDocument(jsonMessage);
-	webSocket.sendTextMessage(jsonDocument.toJson());
-}
-
 void ClientSocket::printService(const QMdnsEngine::Service &service)
 {
 	// Differentiate between service types of the same service
@@ -223,4 +210,17 @@ void ClientSocket::printService(const QMdnsEngine::Service &service)
 	for(const auto &address : addresses) {
 		qDebug() << "\e[34mINFO\e[0m" << "\t" << address;
 	}
+}
+
+void ClientSocket::refreshServices()
+{
+	// Restarts the refresh timer if the refresh was called manually
+	if(!sender() && refreshInterval >= 0) {
+		refreshTimer.start(refreshInterval);
+	}
+
+	QJsonObject jsonMessage;
+	jsonMessage["type"] = MessageType::REFRESH;
+	QJsonDocument jsonDocument(jsonMessage);
+	webSocket.sendTextMessage(jsonDocument.toJson());
 }

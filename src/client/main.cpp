@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	ClientSocket clientSocket(serviceRepository, url, maxRetries, retryInterval, refreshInterval, verbose);
 
 	// Create and show GUI
-	MainWindow mainWindow(serviceRepository);
+	MainWindow mainWindow(serviceRepository, clientSocket);
 	mainWindow.show();
 
 	return app.exec();
